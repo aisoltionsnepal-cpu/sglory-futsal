@@ -9,8 +9,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: MONGODB_URI
-        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sglory-futsal-db
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: PORT
@@ -26,3 +28,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+
+databases:
+  - name: sglory-futsal-db
+    plan: free
+    databaseName: sglory_futsal

@@ -25,7 +25,7 @@ A professional web application for managing futsal inventory and sales records.
 
 - **Frontend**: React, Tailwind CSS, Vite
 - **Backend**: Express.js, Node.js
-- **Database**: MongoDB (Mongoose)
+- **Database**: PostgreSQL (Render Free)
 - **Auth**: JWT (JSON Web Tokens)
 
 ## Default Credentials
@@ -35,29 +35,41 @@ A professional web application for managing futsal inventory and sales records.
 | Admin | admin | admin123 |
 | Sales | sales | sales123 |
 
-## Deployment
+## Deployment on Render (100% Free)
 
-### Render (Recommended)
+### Step 1: Push to GitHub
+Code is already pushed to your repo.
 
-1. Push this repo to GitHub
-2. Create a MongoDB Atlas cluster and get connection string
-3. Connect your GitHub repo to Render
-4. Set environment variable `MONGODB_URI` with your MongoDB connection string
-5. Deploy both services (backend + frontend)
+### Step 2: Deploy on Render
+1. Go to [render.com](https://render.com) and sign up with GitHub
+2. Click **New Blueprint** and connect your repo
+3. Render will auto-detect `render.yaml` and create:
+   - PostgreSQL database (free)
+   - Backend API (free)
+   - Frontend static site (free)
+4. Click **Apply** to deploy
 
-### Local Development
+### Step 3: Done!
+- Backend URL: `https://sglory-futsal-api.onrender.com`
+- Frontend URL: `https://sglory-futsal-frontend.onrender.com`
+
+The database auto-seeds with default users and inventory on first run.
+
+## Local Development
 
 ```bash
 # Install dependencies
-npm run install:all
+cd backend && npm install
+cd ../frontend && npm install
 
-# Set up MongoDB connection in backend/.env
+# Set up PostgreSQL connection in backend/.env
+# DATABASE_URL=postgresql://user:password@localhost:5432/sglory_futsal
 
-# Seed database with default data
-npm run seed
+# Start backend (auto-seeds database)
+cd backend && npm run dev
 
-# Start development server
-npm run dev
+# Start frontend
+cd frontend && npm run dev
 ```
 
 ## Environment Variables
@@ -65,6 +77,6 @@ npm run dev
 ### Backend (.env)
 ```
 PORT=5000
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/sglory-futsal
+DATABASE_URL=postgresql://user:password@host:5432/sglory_futsal
 JWT_SECRET=your_secret_key
 ```

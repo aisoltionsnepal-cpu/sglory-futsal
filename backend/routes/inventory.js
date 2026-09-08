@@ -1,13 +1,13 @@
 const express = require('express');
-const Inventory = require('../models/Inventory');
-const { authenticateToken, requireAdmin } = require('../middleware/auth');
+const { pool } = require('../db/schema');
+const { authenticateToken, requireAdmin } = require('../db/auth');
 
 const router = express.Router();
 
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const items = await Inventory.find().sort({ itemType: 1, brand: 1 });
-    res.json(items);
+    const result = await pool.query('SELECT * FROM inventory ORDER BY item_type, brand');
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -15,9 +15,9 @@ router.get('/', authenticateToken, async (req, res) => {
 
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
-    const item = await Inventory.findById(req.params.id);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
-    res.json(item);
+    const result = await pool.query('SELECT * FROM inventory WHERE id = $1', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Item not found' });
+    res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -29,10 +29,11 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
     if (!itemName || !itemType || !brand || !pricePerPiece || !packSize) {
       return res.status(400).json({ error: 'All fields required' });
     }
-    const item = await Inventory.create({
-      itemName, itemType, brand, pricePerPiece, packSize, stockInPieces: stockInPieces || 0
-    });
-    res.status(201).json(item);
+    const result = await pool.query(
+      'INSERT INTO inventory (item_name, item_type, brand, price_per_piece, pack_size, stock_in_pieces) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [itemName, itemType, brand, pricePerPiece, packSize, stockInPieces || 0]
+    );
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -40,19 +41,21 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
 
 router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const item = await Inventory.findById(req.params.id);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
-
     const { itemName, itemType, brand, pricePerPiece, packSize, stockInPieces } = req.body;
-    if (itemName) item.itemName = itemName;
-    if (itemType) item.itemType = itemType;
-    if (brand) item.brand = brand;
-    if (pricePerPiece) item.pricePerPiece = pricePerPiece;
-    if (packSize) item.packSize = packSize;
-    if (stockInPieces !== undefined) item.stockInPieces = stockInPieces;
-
-    await item.save();
-    res.json(item);
+    const result = await pool.query(
+      `UPDATE inventory SET
+        item_name = COALESCE($1, item_name),
+        item_type = COALESCE($2, item_type),
+        brand = COALESCE($3, brand),
+        price_per_piece = COALESCE($4, price_per_piece),
+        pack_size = COALESCE($5, pack_size),
+        stock_in_pieces = COALESCE($6, stock_in_pieces),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $7 RETURNING *`,
+      [itemName, itemType, brand, pricePerPiece, packSize, stockInPieces, req.params.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Item not found' });
+    res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -60,8 +63,8 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
 
 router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const item = await Inventory.findByIdAndDelete(req.params.id);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
+    const result = await pool.query('DELETE FROM inventory WHERE id = $1 RETURNING id', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Item not found' });
     res.json({ message: 'Item deleted' });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
@@ -75,14 +78,17 @@ router.post('/restock', authenticateToken, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Valid item ID and packs required' });
     }
 
-    const item = await Inventory.findById(id);
-    if (!item) return res.status(404).json({ error: 'Item not found' });
+    const item = await pool.query('SELECT * FROM inventory WHERE id = $1', [id]);
+    if (item.rows.length === 0) return res.status(404).json({ error: 'Item not found' });
 
-    const addedPieces = packs * item.packSize;
-    item.stockInPieces += addedPieces;
-    await item.save();
+    const inv = item.rows[0];
+    const addedPieces = packs * inv.pack_size;
+    const result = await pool.query(
+      'UPDATE inventory SET stock_in_pieces = stock_in_pieces + $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
+      [addedPieces, id]
+    );
 
-    res.json({ message: `Added ${packs} packs (${addedPieces} pieces) to ${item.brand}`, item });
+    res.json({ message: `Added ${packs} packs (${addedPieces} pieces) to ${inv.brand}`, item: result.rows[0] });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }

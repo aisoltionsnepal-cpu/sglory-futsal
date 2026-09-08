@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { pool } = require('./schema');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sglory_futsal_secret_key_2026_pro';
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user._id, username: user.username, role: user.role },
+    { id: user.id, username: user.username, role: user.role },
     JWT_SECRET,
     { expiresIn: '24h' }
   );
@@ -18,9 +18,14 @@ const authenticateToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
-    if (!user || !user.active) return res.status(403).json({ error: 'User not found or inactive' });
-    req.user = user;
+    const result = await pool.query(
+      'SELECT id, username, role, full_name, active FROM users WHERE id = $1',
+      [decoded.id]
+    );
+    if (result.rows.length === 0 || !result.rows[0].active) {
+      return res.status(403).json({ error: 'User not found or inactive' });
+    }
+    req.user = result.rows[0];
     next();
   } catch {
     return res.status(403).json({ error: 'Invalid token' });
@@ -34,4 +39,4 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { generateToken, authenticateToken, requireAdmin, JWT_SECRET };
+module.exports = { generateToken, authenticateToken, requireAdmin };
