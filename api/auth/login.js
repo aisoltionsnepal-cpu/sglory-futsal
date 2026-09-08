@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { getPool, initDB, cors } = require('../_lib/db');
-const { JWT_SECRET } = require('../_lib/auth');
+const { getPool, initDB, cors } = require('../lib/db');
+const { JWT_SECRET } = require('../lib/auth');
 
 let ready = false;
 

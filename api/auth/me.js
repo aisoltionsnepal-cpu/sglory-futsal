@@ -1,7 +1,7 @@
-const { cors } = require('../_lib/db');
-const { ensureDB, getUser, JWT_SECRET } = require('../_lib/auth');
+const { cors } = require('../lib/db');
+const { ensureDB, getUser, JWT_SECRET } = require('../lib/auth');
 const jwt = require('jsonwebtoken');
-const { getPool } = require('../_lib/db');
+const { getPool } = require('../lib/db');
 
 module.exports = async (req, res) => {
   cors(res);

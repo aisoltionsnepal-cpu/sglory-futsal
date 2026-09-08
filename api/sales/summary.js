@@ -1,5 +1,5 @@
-const { cors, getPool, initDB } = require('../_lib/db');
-const { getUser, ensureDB } = require('../_lib/auth');
+const { cors, getPool, initDB } = require('../lib/db');
+const { getUser, ensureDB } = require('../lib/auth');
 
 let ready = false;
 
