@@ -4,9 +4,10 @@ let pool;
 
 function getPool() {
   if (!pool) {
+    const dbUrl = process.env.DATABASE_URL;
     pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
+      connectionString: dbUrl,
+      ssl: dbUrl && dbUrl.includes('supabase') ? { rejectUnauthorized: false } : false
     });
   }
   return pool;
