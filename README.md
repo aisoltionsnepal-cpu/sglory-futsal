@@ -1,82 +1,32 @@
 # S-Glory Futsal - Record Management System
 
-A professional web application for managing futsal inventory and sales records.
+## Deploy on Vercel (Free, No Credit Card)
 
-## Features
+### Step 1: Connect to Vercel
+1. Go to [vercel.com](https://vercel.com) → Sign up with GitHub
+2. Click **Add New Project**
+3. Import repo: `aisoltionsnepal-cpu/sglory-futsal`
 
-- **Role-based Access**: Admin and Sales roles
-- **Inventory Management**: Admin can add, edit, delete, and restock items
-- **Sales Recording**: Sales staff can record transactions (no edit/delete)
-- **Reports & Analytics**: Detailed sales insights with date filtering
-- **Real-time Dashboard**: Overview of today's sales activity
+### Step 2: Create Free Database (Supabase)
+1. Go to [supabase.com](https://supabase.com) → Sign up free
+2. Create new project → Note the **Connection string** (Transaction mode)
+3. Format: `postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-ID].supabase.co:5432/postgres`
 
-## Items Tracked
+### Step 3: Add Environment Variable in Vercel
+- `DATABASE_URL` = your Supabase connection string
+- `JWT_SECRET` = any random string (e.g., `my-secret-key-123`)
 
-| Item | Brand | Price/Piece | Pack Size |
-|------|-------|-------------|-----------|
-| Cigarette | Shikhar | Rs. 20 | 20 pcs |
-| Cigarette | Surya | Rs. 25 | 20 pcs |
-| Cigarette | Naulo | Rs. 12 | 20 pcs |
-| Water | Regular | Rs. 25 | 12 pcs |
-| Energy Drink | Xtreme | Rs. 150 | 24 pcs |
-| Energy Drink | Redbull | Rs. 150 | 24 pcs |
+### Step 4: Deploy
+Vercel auto-deploys on push.
 
-## Tech Stack
-
-- **Frontend**: React, Tailwind CSS, Vite
-- **Backend**: Express.js, Node.js
-- **Database**: PostgreSQL (Render Free)
-- **Auth**: JWT (JSON Web Tokens)
-
-## Default Credentials
-
+## Default Login
 | Role | Username | Password |
 |------|----------|----------|
 | Admin | admin | admin123 |
 | Sales | sales | sales123 |
 
-## Deployment on Render (100% Free)
-
-### Step 1: Push to GitHub
-Code is already pushed to your repo.
-
-### Step 2: Deploy on Render
-1. Go to [render.com](https://render.com) and sign up with GitHub
-2. Click **New Blueprint** and connect your repo
-3. Render will auto-detect `render.yaml` and create:
-   - PostgreSQL database (free)
-   - Backend API (free)
-   - Frontend static site (free)
-4. Click **Apply** to deploy
-
-### Step 3: Done!
-- Backend URL: `https://sglory-futsal-api.onrender.com`
-- Frontend URL: `https://sglory-futsal-frontend.onrender.com`
-
-The database auto-seeds with default users and inventory on first run.
-
-## Local Development
-
-```bash
-# Install dependencies
-cd backend && npm install
-cd ../frontend && npm install
-
-# Set up PostgreSQL connection in backend/.env
-# DATABASE_URL=postgresql://user:password@localhost:5432/sglory_futsal
-
-# Start backend (auto-seeds database)
-cd backend && npm run dev
-
-# Start frontend
-cd frontend && npm run dev
-```
-
-## Environment Variables
-
-### Backend (.env)
-```
-PORT=5000
-DATABASE_URL=postgresql://user:password@host:5432/sglory_futsal
-JWT_SECRET=your_secret_key
-```
+## Tech Stack
+- Frontend: React + Tailwind CSS
+- Backend: Vercel Serverless Functions (Node.js)
+- Database: PostgreSQL (Supabase Free)
+- Auth: JWT

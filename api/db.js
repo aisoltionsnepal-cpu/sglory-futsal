@@ -2,7 +2,7 @@ const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: { rejectUnauthorized: false }
 });
 
 const initDB = async () => {
@@ -18,7 +18,6 @@ const initDB = async () => {
         active BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
-
       CREATE TABLE IF NOT EXISTS inventory (
         id SERIAL PRIMARY KEY,
         item_name VARCHAR(100) NOT NULL,
@@ -29,7 +28,6 @@ const initDB = async () => {
         stock_in_pieces INTEGER NOT NULL DEFAULT 0,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
-
       CREATE TABLE IF NOT EXISTS sales (
         id SERIAL PRIMARY KEY,
         inventory_id INTEGER NOT NULL REFERENCES inventory(id),
@@ -47,28 +45,16 @@ const initDB = async () => {
       const bcrypt = require('bcryptjs');
       const adminPass = await bcrypt.hash('admin123', 10);
       const salesPass = await bcrypt.hash('sales123', 10);
-
-      await client.query(
-        'INSERT INTO users (username, password, role, full_name) VALUES ($1, $2, $3, $4)',
-        ['admin', adminPass, 'admin', 'Admin']
-      );
-      await client.query(
-        'INSERT INTO users (username, password, role, full_name) VALUES ($1, $2, $3, $4)',
-        ['sales', salesPass, 'sales', 'Sales User']
-      );
-
-      await client.query(
-        `INSERT INTO inventory (item_name, item_type, brand, price_per_piece, pack_size, stock_in_pieces) VALUES
+      await client.query('INSERT INTO users (username, password, role, full_name) VALUES ($1, $2, $3, $4)', ['admin', adminPass, 'admin', 'Admin']);
+      await client.query('INSERT INTO users (username, password, role, full_name) VALUES ($1, $2, $3, $4)', ['sales', salesPass, 'sales', 'Sales User']);
+      await client.query(`INSERT INTO inventory (item_name, item_type, brand, price_per_piece, pack_size, stock_in_pieces) VALUES
         ('Cigarette', 'cigarette', 'Shikhar', 20, 20, 100),
         ('Cigarette', 'cigarette', 'Surya', 25, 20, 100),
         ('Cigarette', 'cigarette', 'Naulo', 12, 20, 100),
         ('Water Bottle', 'water', 'Regular Water', 25, 12, 48),
         ('Energy Drink', 'energy_drink', 'Xtreme', 150, 24, 48),
-        ('Energy Drink', 'energy_drink', 'Redbull', 150, 24, 48)`
-      );
-      console.log('Database seeded with default data');
+        ('Energy Drink', 'energy_drink', 'Redbull', 150, 24, 48)`);
     }
-    console.log('Database initialized');
   } finally {
     client.release();
   }
