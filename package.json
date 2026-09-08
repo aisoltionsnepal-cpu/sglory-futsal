@@ -1,12 +1,5 @@
 {
   "name": "sglory-futsal",
   "version": "1.0.0",
-  "description": "S-Glory Futsal Record Management System",
-  "scripts": {
-    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
-    "start": "cd backend && node server.js"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "private": true
 }
