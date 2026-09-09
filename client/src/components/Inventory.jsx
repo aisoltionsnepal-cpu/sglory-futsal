@@ -22,8 +22,20 @@ const Inventory = () => {
 
   const handleEdit = async (e) => {
     e.preventDefault();
-    try { await apiCall(`/inventory/${showEdit.id}`, { method: 'PUT', body: JSON.stringify(showEdit) }); setMessage('Item updated'); setShowEdit(null); apiCall('/inventory').then(setItems); }
-    catch (err) { setMessage(err.message); }
+    try {
+      const payload = {
+        itemName: showEdit.item_name,
+        itemType: showEdit.item_type,
+        brand: showEdit.brand,
+        pricePerPiece: parseFloat(showEdit.price_per_piece),
+        packSize: showEdit.pack_size,
+        stockInPieces: showEdit.stock_in_pieces
+      };
+      await apiCall(`/inventory?id=${showEdit.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      setMessage('Item updated');
+      setShowEdit(null);
+      apiCall('/inventory').then(setItems);
+    } catch (err) { setMessage(err.message); }
   };
 
   const handleRestock = async () => {
@@ -33,7 +45,7 @@ const Inventory = () => {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this item?')) return;
-    try { await apiCall(`/inventory/${id}`, { method: 'DELETE' }); setMessage('Deleted'); apiCall('/inventory').then(setItems); }
+    try { await apiCall(`/inventory?id=${id}`, { method: 'DELETE' }); setMessage('Deleted'); apiCall('/inventory').then(setItems); }
     catch (err) { setMessage(err.message); }
   };
 
