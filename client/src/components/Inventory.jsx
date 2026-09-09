@@ -27,9 +27,9 @@ const Inventory = () => {
         itemName: showEdit.item_name,
         itemType: showEdit.item_type,
         brand: showEdit.brand,
-        pricePerPiece: parseFloat(showEdit.price_per_piece),
-        packSize: showEdit.pack_size,
-        stockInPieces: showEdit.stock_in_pieces
+        pricePerPiece: Number(showEdit.price_per_piece),
+        packSize: Number(showEdit.pack_size),
+        stockInPieces: Number(showEdit.stock_in_pieces)
       };
       await apiCall(`/inventory?id=${showEdit.id}`, { method: 'PUT', body: JSON.stringify(payload) });
       setMessage('Item updated');
