@@ -4,19 +4,18 @@ let pool;
 
 function getPool() {
   if (!pool) {
-    const dbUrl = process.env.DATABASE_URL;
-    if (dbUrl) {
-      pool = new Pool({
-        connectionString: dbUrl,
-        ssl: { rejectUnauthorized: false }
-      });
-    } else {
+    if (process.env.DB_HOST) {
       pool = new Pool({
         host: process.env.DB_HOST,
         port: parseInt(process.env.DB_PORT || '5432'),
         database: process.env.DB_NAME,
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
+        ssl: { rejectUnauthorized: false }
+      });
+    } else {
+      pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
       });
     }
