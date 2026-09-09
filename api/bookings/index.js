@@ -50,6 +50,27 @@ module.exports = async (req, res) => {
       return res.status(201).json({ message: 'Booking confirmed!', booking: r.rows[0] });
     }
 
+    if (req.method === 'PUT') {
+      const user = await getUser(req);
+      if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+      const { id } = req.query;
+      const { status } = req.body;
+
+      if (!id || !status) return res.status(400).json({ error: 'Booking ID and status required' });
+      if (!['confirmed', 'completed', 'cancelled'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+      }
+
+      const r = await getPool().query(
+        'UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *',
+        [status, id]
+      );
+
+      if (r.rows.length === 0) return res.status(404).json({ error: 'Booking not found' });
+      return res.json({ message: 'Booking updated', booking: r.rows[0] });
+    }
+
     return res.status(404).json({ error: 'Not found' });
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Server error' });
