@@ -6,6 +6,8 @@ import Inventory from './components/Inventory';
 import SalesRecord from './components/SalesRecord';
 import Reports from './components/Reports';
 import Layout from './components/Layout';
+import Booking from './components/Booking';
+import Bookings from './components/Bookings';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = useAuth();
@@ -20,11 +22,13 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/book" element={<Booking />} />
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="inventory" element={<ProtectedRoute adminOnly><Inventory /></ProtectedRoute>} />
             <Route path="sales" element={<SalesRecord />} />
+            <Route path="bookings" element={<Bookings />} />
             <Route path="reports" element={<ProtectedRoute adminOnly><Reports /></ProtectedRoute>} />
           </Route>
         </Routes>

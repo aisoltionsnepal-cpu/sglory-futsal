@@ -46,6 +46,19 @@ async function initDB() {
         sale_date DATE DEFAULT CURRENT_DATE, sale_time TIME DEFAULT CURRENT_TIME,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+      CREATE TABLE IF NOT EXISTS bookings (
+        id SERIAL PRIMARY KEY,
+        customer_name VARCHAR(100) NOT NULL,
+        customer_phone VARCHAR(20) NOT NULL,
+        customer_email VARCHAR(100),
+        booking_date DATE NOT NULL,
+        booking_time TIME NOT NULL,
+        duration INTEGER NOT NULL DEFAULT 1,
+        total_price DECIMAL(10,2) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'confirmed' CHECK(status IN ('confirmed', 'cancelled', 'completed')),
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
     `);
     const check = await client.query('SELECT id FROM users LIMIT 1');
     if (check.rows.length === 0) {
